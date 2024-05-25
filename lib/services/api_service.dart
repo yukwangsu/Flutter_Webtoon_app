@@ -1,10 +1,14 @@
+import 'dart:convert';
+
+import 'package:flutter_webtoon_app/models/webtoon_model.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
   final String baseUrl = "https://webtoon-crawler.nomadcoders.workers.dev";
   final String today = "today";
 
-  void getTodaysToons() async {
+  Future<List<WebtoonModel>> getTodaysToons() async {
+    List<WebtoonModel> webtoonInstances = [];
     final url = Uri.parse('$baseUrl/$today');
     //async(비동기) programming: dart가 이 코드가 작업을 마칠 때까지
     //즉, 응답을 받을 때까지 기다리는 것. 다음줄로 넘어가지 않음.
@@ -15,8 +19,11 @@ class ApiService {
     //완료 되었을 때 이 함수는 Response를 반환한다.
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      print(response.body);
-      return;
+      final List<dynamic> webtoons = jsonDecode(response.body);
+      for (var webtoon in webtoons) {
+        webtoonInstances.add(WebtoonModel.fromJson(webtoon));
+      }
+      return webtoonInstances;
     }
     throw Error();
   }
