@@ -29,14 +29,26 @@ class HomeScreen extends StatelessWidget {
       ),
       //FutureBuilder는 future값을 기다리고 데이터가 존재하는지 알려준다.
       body: FutureBuilder(
-          future: webtoons,
-          //snapshot은 future의 상태를 보여준다(로딩 중인지, 데이터가 있는지, 에러가 발생했는지)
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return const Text("There is data!");
-            }
-            return const Text('Loaing...');
-          }),
+        future: webtoons,
+        //snapshot은 future의 상태를 보여준다(로딩 중인지, 데이터가 있는지, 에러가 발생했는지)
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            //ListView.builder는 한번에 다 로딩하지 않고 필요할 때 아이템을 만든다.
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                var webtoon = snapshot.data![index];
+                return Text(webtoon.title);
+              },
+              //separatorBuilder: (context, index) => const SizedBox(width: 20),
+            );
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
     );
   }
 }
