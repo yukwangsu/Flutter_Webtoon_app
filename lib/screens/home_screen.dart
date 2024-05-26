@@ -2,33 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webtoon_app/models/webtoon_model.dart';
 import 'package:flutter_webtoon_app/services/api_service.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  List<WebtoonModel> webtoons = [];
-  bool isLoading = true;
-
-  void waitForWebToons() async {
-    webtoons = await ApiService.getTodaysToons();
-    isLoading = false;
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    waitForWebToons();
-  }
+  final Future<List<WebtoonModel>> webtoons = ApiService.getTodaysToons();
 
   @override
   Widget build(BuildContext context) {
-    print(webtoons);
-    print(isLoading);
     //Scaffold는 screen을 위한 기본적인 레이아웃과 설정을 제공한다.
     return Scaffold(
       backgroundColor: Colors.white,
@@ -47,6 +27,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      //FutureBuilder는 future값을 기다리고 데이터가 존재하는지 알려준다.
+      body: FutureBuilder(
+          future: webtoons,
+          //snapshot은 future의 상태를 보여준다(로딩 중인지, 데이터가 있는지, 에러가 발생했는지)
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return const Text("There is data!");
+            }
+            return const Text('Loaing...');
+          }),
     );
   }
 }
