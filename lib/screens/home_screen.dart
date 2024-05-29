@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webtoon_app/models/webtoon_model.dart';
 import 'package:flutter_webtoon_app/services/api_service.dart';
+import 'package:flutter_webtoon_app/widgets/webtoon_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -34,14 +35,13 @@ class HomeScreen extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             //ListView.builder는 한번에 다 로딩하지 않고 필요할 때 아이템을 만든다.
-            return ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                var webtoon = snapshot.data![index];
-                return Text(webtoon.title);
-              },
-              //separatorBuilder: (context, index) => const SizedBox(width: 20),
+            return Column(
+              children: [
+                const SizedBox(
+                  height: 50,
+                ),
+                Expanded(child: makeList(snapshot))
+              ],
             );
           }
           return const Center(
@@ -49,6 +49,25 @@ class HomeScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  ListView makeList(AsyncSnapshot<List<WebtoonModel>> snapshot) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: snapshot.data!.length,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      //itemBuilder: 한번에 다 로딩하지 않고 스크롤할 때마다 로딩한다.
+      itemBuilder: (context, index) {
+        var webtoon = snapshot.data![index];
+        return Webtoon(
+          title: webtoon.title,
+          thumb: webtoon.thumb,
+          id: webtoon.id,
+        );
+      },
+      //separatorBuilder는 사이에 공간을 만드는 역할.
+      separatorBuilder: (context, index) => const SizedBox(width: 40),
     );
   }
 }
