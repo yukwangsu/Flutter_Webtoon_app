@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webtoon_app/models/webtoon_detail_model.dart';
 import 'package:flutter_webtoon_app/models/webtoon_episode_model.dart';
 import 'package:flutter_webtoon_app/services/api_service.dart';
+import 'package:flutter_webtoon_app/widgets/episode_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class DetailScreen extends StatefulWidget {
   final String title, thumb, id;
@@ -125,39 +128,8 @@ class _DetailScreenState extends State<DetailScreen> {
                           for (var episode in snapshot.data!.length > 10
                               ? snapshot.data!.sublist(0, 10)
                               : snapshot.data!)
-                            Container(
-                              //margin: container 사이에 간격을 추가
-                              margin: const EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: Colors.green.shade400,
-                              ),
-                              child: Padding(
-                                //container 내부에 padding을 추가
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                  horizontal: 20,
-                                ),
-                                child: Row(
-                                  //양쪽 끝에 배치
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      episode.title,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.chevron_right_rounded,
-                                      color: Colors.white,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                            //widget.id는 DetailScreen의 ID임.(사용자가 클릭한 webtoon)
+                            Episode(episode: episode, webtoonId: widget.id),
                         ],
                       );
                     }
