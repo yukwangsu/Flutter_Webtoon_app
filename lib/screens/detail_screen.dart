@@ -3,6 +3,7 @@ import 'package:flutter_webtoon_app/models/webtoon_detail_model.dart';
 import 'package:flutter_webtoon_app/models/webtoon_episode_model.dart';
 import 'package:flutter_webtoon_app/services/api_service.dart';
 import 'package:flutter_webtoon_app/widgets/episode_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -23,6 +24,26 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   late Future<WebtoonDetailModel> webtoon;
   late Future<List<WebtoonEpisodeModel>> episodes;
+  late SharedPreferences prefs;
+  bool isLiked = false;
+
+  //SharedPreferences를 사용해서 좋아요를 누른 weebtoon인지 확인.
+  Future initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    final likedToons = prefs.getStringList('likedToons');
+    //likedToons StringList가 있으면 widget.id가 likedToons에 있는지 확인
+    if (likedToons != null) {
+      //widget.id가 likedToons에 있으면 isLiked = true로 설정.
+      if (likedToons.contains(widget.id) == true) {
+        setState(() {
+          isLiked = true;
+        });
+      }
+    } else {
+      //likedToons StringList가 없으면 만들기
+      await prefs.setStringList('likedToons', []);
+    }
+  }
 
   @override
   void initState() {
@@ -30,6 +51,22 @@ class _DetailScreenState extends State<DetailScreen> {
     //DetailScreen을 StatefulWidget으로 바꾸고 widget.id를 사용해서 api를 요청한다.
     webtoon = ApiService.getToonById(widget.id);
     episodes = ApiService.getLatestEpisodesById(widget.id);
+    initPrefs();
+  }
+
+  onHeartTap() async {
+    final likedToons = prefs.getStringList('likedToons');
+    if (likedToons != null) {
+      if (isLiked) {
+        likedToons.remove(widget.id);
+      } else {
+        likedToons.add(widget.id);
+      }
+      await prefs.setStringList('likedToons', likedToons);
+      setState(() {
+        isLiked = !isLiked;
+      });
+    }
   }
 
   @override
@@ -43,6 +80,14 @@ class _DetailScreenState extends State<DetailScreen> {
           centerTitle: true,
           //foregroundColor로 Appbar의 글씨 색을 바꾼다.
           foregroundColor: Colors.green,
+          actions: [
+            IconButton(
+              onPressed: onHeartTap,
+              icon: Icon(
+                isLiked ? Icons.favorite : Icons.favorite_outline,
+              ),
+            )
+          ],
           title: Text(
             widget.title,
             style: const TextStyle(
